@@ -1,4 +1,3 @@
-import { NavigationProp } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -6,55 +5,66 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RegisterProps from "../../utils/interfaces/RegisterProps";
+import { StackActions } from "@react-navigation/native";
 
-interface RegisterProps {
-    navigation: NavigationProp<Record<string, object>>;
-  }
+
 
 export default function Login({ navigation }: RegisterProps) {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+    const handleEmailChange = (text : string) => {
+      setEmail(text);
+      const emailRegex = /\S+@\S+\.\S+/;
+      setIsEmailValid(emailRegex.test(text));
+    };
 
-
+    const handlePasswordChange = (text : string) => {
+      setPassword(text);
+      setIsPasswordValid(text.length >= 8);
+    };
 
 
   const handleLogin = async () => {
-    try {
-      // Get the user data from local storage
-      const userData = await AsyncStorage.getItem('users');
-      const users = JSON.parse(userData as string);
-
-      // Find the user object with the given username
-      const user = users.find((u : any) => u.username === username);
-
-      if (user && user.password === password) {
-        // If the password is correct, store the current user in storage
-        await AsyncStorage.setItem('current_user', JSON.stringify(user));
-
-        // Navigate to the home screen
-        navigation.navigate({name:'Home' ,params:{}});
-      } else {
-        // If the credentials are invalid, show an error message
-        // alert('Invalid username or password.');
+    if (isEmailValid && isPasswordValid) {
+      try {
+        const userData = await AsyncStorage.getItem('users');
+        const users = JSON.parse(userData as string);
+        const user = users.find((u : any) => u.email === email);
+        if (user && user.password === password) {
+          await AsyncStorage.setItem('current_user', JSON.stringify(user));
+          navigation.dispatch(StackActions.replace('Main'));
+        } else {
+          // If the credentials are invalid, show an error message
+          // alert('Invalid username or password.');
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
     }
   };
+
+  const handleForgotPassword = () => {
+    Linking.openURL('https://toggl.com/track/forgot-password/');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Login</Text>
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Username</Text>
+          <Text style={styles.label}>Email</Text>
           <View style={styles.inputWrapper}>
             <TextInput
-              style={styles.input}
-              placeholder="Enter your username..."
-              value={username}
-              onChangeText={setUsername}
+               style={[styles.input, !isEmailValid && styles.invalidInput]}
+              placeholder="Enter your email..."
+              value={email}
+              onChangeText={handleEmailChange}
             />
           </View>
         </View>
@@ -62,18 +72,22 @@ export default function Login({ navigation }: RegisterProps) {
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputWrapper}>
           <TextInput
-              style={styles.input}
+               style={[styles.input, !isPasswordValid && styles.invalidInput]}
               placeholder="Enter your Password..."
               value={password}
               secureTextEntry={true}
-              onChangeText={setPassword}
+              onChangeText={handlePasswordChange}
             />
           </View>
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity style={[styles.button, !(isEmailValid && isPasswordValid) && styles.disabledButton]}
+         disabled={!(isEmailValid && isPasswordValid)}
+         onPress={handleLogin}>
           <Text style={styles.createAccountButtonText}>Log in</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity onPress={handleForgotPassword}>
+          <Text style={styles.forgotPasswordLink}>Forgot Password?</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.dividerContainer}>
         <View style={styles.divider} />
@@ -132,6 +146,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
   },
+  invalidInput: {
+    borderColor: 'red',
+  },
   label: {
     color: "#727171",
     fontWeight: "bold",
@@ -144,6 +161,14 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     backgroundColor: '#2cb8e5',
     borderRadius: 5
+  },
+  disabledButton: {
+    opacity: 0.5,
+
+  },
+  forgotPasswordLink: {
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
   dividerContainer: {
     flexDirection: "row",

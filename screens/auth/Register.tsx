@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, Image, ScrollView, Button } from 'react-native';
-import { NavigationProp } from '@react-navigation/core';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface RegisterProps {
-  navigation: NavigationProp<Record<string, object>>;
-}
+import RegisterProps from '../../utils/interfaces/RegisterProps';
 
 export default function Register({ navigation }: RegisterProps){
   const [firstName, setFirstName] = useState('');
