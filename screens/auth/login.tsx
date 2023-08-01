@@ -10,12 +10,15 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RegisterProps from "../../utils/interfaces/RegisterProps";
 import { StackActions } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
 
 
 
 export default function Login({ navigation }: RegisterProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
     const handleEmailChange = (text : string) => {
@@ -29,6 +32,22 @@ export default function Login({ navigation }: RegisterProps) {
       setIsPasswordValid(text.length >= 8);
     };
 
+    const handleEmailFocus = () => {
+      setIsEmailFocused(true);
+    };
+
+    const handleEmailBlur = () => {
+      setIsEmailFocused(false);
+    };
+
+    const handlePasswordFocus = () => {
+      setIsPasswordFocused(true);
+    };
+
+    const handlePasswordBlur = () => {
+      setIsPasswordFocused(false);
+    };
+
 
   const handleLogin = async () => {
     if (isEmailValid && isPasswordValid) {
@@ -40,8 +59,11 @@ export default function Login({ navigation }: RegisterProps) {
           await AsyncStorage.setItem('current_user', JSON.stringify(user));
           navigation.dispatch(StackActions.replace('Main'));
         } else {
-          // If the credentials are invalid, show an error message
-          // alert('Invalid username or password.');
+          Toast.show({
+            type: "error",
+            text1: "Login Status",
+            text2: "Invalid Email or Password...",
+          });
         }
       } catch (error) {
         console.log(error);
@@ -61,22 +83,26 @@ export default function Login({ navigation }: RegisterProps) {
           <Text style={styles.label}>Email</Text>
           <View style={styles.inputWrapper}>
             <TextInput
-               style={[styles.input, !isEmailValid && styles.invalidInput]}
-              placeholder="Enter your email..."
-              value={email}
-              onChangeText={handleEmailChange}
-            />
+                style={[styles.input, isEmailFocused && !isEmailValid && styles.invalidInput]}
+                placeholder="Enter your email..."
+                value={email}
+                onChangeText={handleEmailChange}
+                onFocus={handleEmailFocus}
+                onBlur={handleEmailBlur}
+              />
           </View>
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputWrapper}>
-          <TextInput
-               style={[styles.input, !isPasswordValid && styles.invalidInput]}
+            <TextInput
+              style={[styles.input, isPasswordFocused && !isPasswordValid && styles.invalidInput]}
               placeholder="Enter your Password..."
               value={password}
               secureTextEntry={true}
               onChangeText={handlePasswordChange}
+              onFocus={handlePasswordFocus}
+              onBlur={handlePasswordBlur}
             />
           </View>
         </View>

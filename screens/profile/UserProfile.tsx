@@ -4,6 +4,7 @@ import { View, StyleSheet, Text, Image, TouchableOpacity, SafeAreaView } from 'r
 import RegisterProps from '../../utils/interfaces/RegisterProps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions } from '@react-navigation/native';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 
 
 
@@ -13,6 +14,11 @@ const [user, setUser] = useState<any>();
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('current_user');
+    Toast.show({
+      type: 'success',
+      text1: 'Logout status',
+      text2: 'Logged out Successfully',
+    });
     navigation.dispatch(StackActions.replace('Main'));
   };
 

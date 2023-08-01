@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RegisterProps from '../../utils/interfaces/RegisterProps';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 
 export default function Register({ navigation }: RegisterProps){
   const [firstName, setFirstName] = useState('');
@@ -10,31 +11,119 @@ export default function Register({ navigation }: RegisterProps){
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
 
+  const isEmailValid = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  const isMinLengthValid = (input: string, minLength :number) => {
+    return input.length >= minLength;
+  };
+
+  const isUsernameUnique = async (username : string) => {
+    try {
+      const userData = await AsyncStorage.getItem('users');
+      const users = JSON.parse(userData as string);
+      return !users.some((user : any) => user.username === username);
+    } catch (error) {
+      console.log('Error fetching user data:', error);
+      return false;
+    }
+  };
+
+  const isEmailUnique = async (email:string) => {
+    try {
+      const userData = await AsyncStorage.getItem('users');
+      const users = JSON.parse(userData as string);
+      return !users.some((user:any) => user.email === email);
+    } catch (error) {
+      console.log('Error fetching user data:', error);
+      return false;
+    }
+  };
+
 
   const handleSignUp = async () => {
+    if (!isMinLengthValid(firstName, 3)) {
+      Toast.show({
+        type: 'error',
+        text1: 'First name',
+        text2: 'must be at least 3 characters long',
+      });
+      return;
+    }
+
+    if (!isMinLengthValid(lastName, 3)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Last name ',
+        text2: 'must be at least 3 characters long',
+      });
+      return;
+    }
+
+    if (!isEmailValid(email)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Email',
+        text2: 'Enter a valid email address',
+      });
+      return;
+    }
+    if (!(await isEmailUnique(email))) {
+      Toast.show({
+        type: 'error',
+        text1: 'Email',
+        text2: 'Email is already registered',
+      });
+      return;
+    }
+
+    if (!isMinLengthValid(password, 8)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Password ',
+        text2: 'must be at least 8 characters long',
+      });
+      return;
+    }
+
+    if (!(await isUsernameUnique(username))) {
+      Toast.show({
+        type: 'error',
+        text1: 'Username',
+        text2: 'Username is already taken',
+      });
+      return;
+    }
+
+
     const newUser = {
-        firstName,
-        lastName,
-        email,
-        password,
-        username,
-     };
-     try {
-        const userData = await AsyncStorage.getItem('users');
-        let users = [];
+      firstName,
+      lastName,
+      email,
+      password,
+      username,
+    };
+    try {
+      const userData = await AsyncStorage.getItem('users');
+      let users = [];
 
-        if (userData !== null) {
-          users = JSON.parse(userData);
-        }
-
-        users.push(newUser);
-
-        await AsyncStorage.setItem('users', JSON.stringify(users));
-
-        navigation.navigate({name: 'Login',params:{}});
-      } catch (error) {
-        console.log(error);
+      if (userData !== null) {
+        users = JSON.parse(userData);
       }
+
+      users.push(newUser);
+
+      await AsyncStorage.setItem('users', JSON.stringify(users));
+      Toast.show({
+        type: 'success',
+        text1: 'Register status',
+        text2: 'Registration successfully done',
+      });
+      navigation.navigate({ name: 'Login', params: {} });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
