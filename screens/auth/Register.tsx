@@ -98,6 +98,7 @@ export default function Register({ navigation }: RegisterProps){
 
 
     const newUser = {
+      id: Date.now(),
       firstName,
       lastName,
       email,
