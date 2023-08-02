@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -17,7 +17,8 @@ interface Task {
 
 const ListTasks = ({ navigation }: RegisterProps) => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const fetchTasks = async () => {
+
+  const fetchTasks = useCallback(async () => {
     try {
       const currentUserData = await AsyncStorage.getItem('current_user');
       const currentUser = JSON.parse(currentUserData as string);
@@ -33,17 +34,19 @@ const ListTasks = ({ navigation }: RegisterProps) => {
           const second = new Date(b.startTime)
           return first.getTime() - second.getTime()
         });
-
         setTasks(userTasks);
       }
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
-  };
+  }, []);
 
-  useFocusEffect(() => {
-    fetchTasks();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      fetchTasks();
+    }, [fetchTasks])
+  );
+
 
   const handleDeleteTask = async (taskId: string) => {
     try {
