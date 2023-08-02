@@ -11,7 +11,7 @@ export default function InBoardingOne({ navigation }: RegisterProps) {
         source={require('../../assets/1.png')}
         style={styles.imageStyle}
       />
-      <Text style={styles.heading}>Welcome!</Text>
+      <Text style={styles.heading}>Welcome To Time Tracker App!</Text>
       <Text style={styles.text}>This app helps you keep track of your time spent on various projects with different tasks.</Text>
       <TouchableOpacity
         style={styles.buttonStyle}

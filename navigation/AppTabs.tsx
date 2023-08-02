@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@rneui/base';
-import Home from './Home';
 import Profile from './Profile';
+import AddTask from '../screens/home/AddTask';
+import ListTasks from '../screens/home/ListTasks';
 
 
 
@@ -12,18 +13,29 @@ const Tab = createBottomTabNavigator();
 export default function AppTabs() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Your Tasks"
       screenOptions={{
         tabBarActiveTintColor: '#00a7d5',
       }}
     >
       <Tab.Screen
-        name="Home"
-        component={Home}
+        name="Your Tasks"
+        component={ListTasks}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: 'Your Tasks',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={color} size={size} />
+            <Icon name="checklist" color={color} size={size} />
+          ),
+          headerShown: false
+        }}
+      />
+        <Tab.Screen
+        name="AddTask"
+        component={AddTask}
+        options={{
+          tabBarLabel: 'Add Task',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="add" color={color} size={size} />
           ),
           headerShown: false
         }}
